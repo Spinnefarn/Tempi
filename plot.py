@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as p
-from collections import Counter
-import json
 
 
 def removenoise(array, noiselvl=5):
@@ -40,36 +38,43 @@ if __name__ == '__main__':
     oneplot = []
     plotdata = []
     data = removenoise([int(x) for x in data])
+    output = []
     for x in data:
         if x == prev:
             count += 1
         else:
-            if prev == 0 and 50 < count and not pri:
-                pri = 39000
-                largen.append(round(count/100))
+            if 50 < count:
+                output.append((prev, count))
                 count = 0
                 prev = x
-                continue
-            if pri:
-                oneplot.extend([int(prev) for _ in range(int(count/10))])
-                if pri > count:
-                    pri -= count
-                else:
-                    pri = 0
-            elif not pri and oneplot:
-                diffzero = [x for x in oneplot if x != 0]
-                if diffzero and oneplot:
-                    plotdata.append(oneplot)
-                oneplot = []
-            prev = x
-            count = 0
+    parsedout = []
+    lzero, lone = False, False
+    for i in range(len(output)):
+        if 82 < output[i][1] < 95:
+            if output[i][0] == 0:
+                parsedout.append(1)
+                lone, lzero = True, False
+        elif 114 < output[i][1] < 125:
+            if output[i][0] == 1 and not lone:
+                parsedout.append(1)
+                lone, lzero = False, False
+        elif 60 < output[i][1] < 77:
+            if output[i][0] == 0:
+                parsedout.append(0)
+                lone, lzero = False, True
+        elif 95 < output[i][1] < 105:
+            if output[i][0] == 1 and not lzero:
+                parsedout.append(0)
+                lone, lzero = False, False
 
-    print(json.dumps(Counter(largen), sort_keys=True))
-    
-    p.figure(figsize=(220, 5))
-    datase = 0
-    for dataset in plotdata:
-        p.plot(plotdata[:3200000])
+    print(str(output))
+    print(str(parsedout))
+
+    if False:
+        p.figure(figsize=(220, 5))
+        datase = 0
+        # for dataset in plotdata:
+        p.plot(data)
         p.tight_layout()
         p.xlim(xmin=0)
         p.savefig('data{0}.png'.format(datase))
